@@ -22,12 +22,12 @@ class NearbyConnection(context: Context, cmdCallback: SumobotCallback) : GoogleA
             .build()
 
     fun connect() {
-        Log.d(Constants.TAG, "Connecting")
+        Log.d(TAG, "Connecting")
         googleApiClient.connect()
     }
 
     fun disconnect() {
-        Log.d(Constants.TAG, "Disonnecting")
+        Log.d(TAG, "Disonnecting")
         if (googleApiClient.isConnected) {
             googleApiClient.disconnect()
         }
@@ -35,7 +35,7 @@ class NearbyConnection(context: Context, cmdCallback: SumobotCallback) : GoogleA
 
     //[ConnectionCallbacks]
     override fun onConnected(bunde: Bundle?) {
-        Log.d(Constants.TAG, "startAdvertising")
+        Log.d(TAG, "startAdvertising")
         startAdvertising()
     }
 
@@ -46,21 +46,28 @@ class NearbyConnection(context: Context, cmdCallback: SumobotCallback) : GoogleA
 
     //[OnConnectionFailedListener]
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        Log.e(Constants.TAG, "Connection failed ${connectionResult.errorMessage} ${connectionResult.resolution} ${connectionResult.errorCode}")
+        /*
+        if (googleApiClient.isConnected) {
+            googleApiClient.disconnect()
+            googleApiClient.connect()
+
+        }
+        */
+        Log.e(TAG, "Connection failed: ${connectionResult.errorMessage} ${connectionResult.errorCode}")
     }
     //[/OnConnectionFailedListener]
 
     private fun startAdvertising() {
         Nearby.Connections.startAdvertising(googleApiClient, null,
-                Constants.NEARBY_SERVICE_ID,
+                NEARBY_SERVICE_ID,
                 connectionLifecycleCallback,
                 AdvertisingOptions(Strategy.P2P_STAR))
                 .setResultCallback { result ->
-                    Log.d(Constants.TAG, "startAdvertising:onResult:" + result)
+                    Log.d(TAG, "startAdvertising result ->" + result)
                     if (result.status.isSuccess) {
-                        Log.d(Constants.TAG, "Advertising succeeded ${result.status}")
+                        Log.d(TAG, "Advertising succeeded ${result.status}")
                     } else {
-                        Log.e(Constants.TAG, "Advertising failed ${result.status.statusCode}")
+                        Log.e(TAG, "Advertising failed ${result.status.statusCode}")
                     }
                 }
     }
@@ -70,14 +77,15 @@ class NearbyConnection(context: Context, cmdCallback: SumobotCallback) : GoogleA
             payload?.let {
                 if (it.type == Payload.Type.BYTES) {
                     val msg:String? = it.asBytes()?.let { it1 -> String(it1) }
+                    Log.d(TAG, "Received-> $msg")
                     when(msg) {
-                        null -> Log.d(Constants.TAG, "Payload is null")
-                        Constants.FWD -> cmdCallback.fwd()
-                        Constants.BACK -> cmdCallback.back()
-                        Constants.LEFT -> cmdCallback.left()
-                        Constants.RIGHT -> cmdCallback.right()
-                        Constants.STOP -> cmdCallback.stop()
-                        else -> Log.d(Constants.TAG, "Unknown command received")
+                        null -> Log.d(TAG, "Payload is null")
+                        FWD -> cmdCallback.fwd()
+                        BACK -> cmdCallback.back()
+                        LEFT -> cmdCallback.left()
+                        RIGHT -> cmdCallback.right()
+                        STOP -> cmdCallback.stop()
+                        else -> Log.d(TAG, "Unknown command received")
                     }
                 }
             }
@@ -89,23 +97,24 @@ class NearbyConnection(context: Context, cmdCallback: SumobotCallback) : GoogleA
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
 
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
+            Log.d(TAG, "Accepting connection $endpointId")
             Nearby.Connections.acceptConnection(googleApiClient, endpointId, payloadCallback)
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             when (result.status.statusCode) {
                 ConnectionsStatusCodes.STATUS_OK -> {
-                    Log.d(Constants.TAG, "Client connected $endpointId")
+                    Log.d(TAG, "Client connected $endpointId")
                     Nearby.Connections.stopAdvertising(googleApiClient)
                 }
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
-                    Log.d(Constants.TAG, "Connection rejected from $endpointId")
+                    Log.d(TAG, "Connection rejected from $endpointId")
                 }
             }
         }
 
         override fun onDisconnected(endpointId: String) {
-            Log.d(Constants.TAG, "Disconnected from $endpointId")
+            Log.d(TAG, "Disconnected from $endpointId")
             startAdvertising()
         }
     }

@@ -1,13 +1,5 @@
 package com.bitandik.labs.kotlinbots.sumobot
 
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.LEFT_SIDE
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.SERVO_MAX_ANGLE
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.SERVO_MIN_ANGLE
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.SERVO_PULSE_MAX_DURATION
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.SERVO_PULSE_MIN_DURATION
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.W_BACKWARD
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.W_FORWARD
-import com.bitandik.labs.kotlinbots.sumobot.Constants.Companion.W_STOP
 import com.google.android.things.contrib.driver.pwmservo.Servo
 
 /**
